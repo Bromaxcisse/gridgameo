@@ -1,0 +1,98 @@
+name: Build Signed APK & AAB
+
+on:
+  push:
+    branches:
+      - "**"
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: "3.41.4"
+  JAVA_VERSION: "17"
+
+jobs:
+  build:
+    name: Build Release APK & AAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # ── Checkout ──────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Java ──────────────────────────────────────────────────────────
+      - name: Set up Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: ${{ env.JAVA_VERSION }}
+
+      # ── Flutter ───────────────────────────────────────────────────────
+      - name: Set up Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Verify Flutter installation
+        run: flutter doctor -v
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # ── Decode keystore from secrets ──────────────────────────────────
+      - name: Decode keystore
+        env:
+          OXYGENGRID_KEYSTORE_BASE64: ${{ secrets.OxygenGridBase64 }}
+        run: |
+          echo "$OXYGENGRID_KEYSTORE_BASE64" | base64 --decode > "${{ github.workspace }}/android/app/oxygengrid-release.jks"
+
+      # ── Write key.properties ──────────────────────────────────────────
+      - name: Create key.properties
+        env:
+          OXYGENGRID_STORE_PASSWORD: ${{ secrets.OxygenGridStorePassword }}
+          OXYGENGRID_KEY_PASSWORD: ${{ secrets.OxygenGridKeyPassword }}
+          OXYGENGRID_KEY_ALIAS: ${{ secrets.OxygenGridKeyAlias }}
+        run: |
+          PROPS_FILE="${{ github.workspace }}/android/key.properties"
+          {
+            echo "storePassword=${OXYGENGRID_STORE_PASSWORD}"
+            echo "keyPassword=${OXYGENGRID_KEY_PASSWORD}"
+            echo "keyAlias=${OXYGENGRID_KEY_ALIAS}"
+            echo "storeFile=${{ github.workspace }}/android/app/oxygengrid-release.jks"
+          } > "$PROPS_FILE"
+
+      # ── Build signed APK (release) ───────────────────────────────────
+      - name: Build release APK
+        run: flutter build apk --release
+
+      # ── Build signed AAB (release) ───────────────────────────────────
+      - name: Build release AAB
+        run: flutter build appbundle --release
+
+      # ── Upload APK artifact ───────────────────────────────────────────
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      # ── Upload AAB artifact ───────────────────────────────────────────
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      # ── Cleanup secrets (always runs, even on failure) ───────────────
+      - name: Remove keystore and key.properties
+        if: always()
+        run: |
+          rm -f "${{ github.workspace }}/android/app/oxygengrid-release.jks"
+          rm -f "${{ github.workspace }}/android/key.properties"

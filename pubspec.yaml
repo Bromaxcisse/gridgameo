@@ -1,0 +1,55 @@
+name: the_oxygen_grid
+description: "The Oxygen Grid - a 2D grid-based survival puzzle game built with Flutter and Flame."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flame: ^1.36.0
+  shared_preferences: ^2.5.4
+  web: ^1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+  fonts:
+    - family: ChakraPetch
+      fonts:
+        - asset: assets/font/ChakraPetch-Light.ttf
+          weight: 300
+        - asset: assets/font/ChakraPetch-LightItalic.ttf
+          weight: 300
+          style: italic
+        - asset: assets/font/ChakraPetch-Regular.ttf
+          weight: 400
+        - asset: assets/font/ChakraPetch-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/font/ChakraPetch-Medium.ttf
+          weight: 500
+        - asset: assets/font/ChakraPetch-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/font/ChakraPetch-SemiBold.ttf
+          weight: 600
+        - asset: assets/font/ChakraPetch-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/font/ChakraPetch-Bold.ttf
+          weight: 700
+        - asset: assets/font/ChakraPetch-BoldItalic.ttf
+          weight: 700
+          style: italic
