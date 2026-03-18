@@ -5,16 +5,18 @@ import '../../the_oxygen_grid.dart';
 
 class ObstacleRevealManager extends Component
     with HasGameReference<TheOxygenGrid> {
-  late double _revealDuration;
+  double _revealDuration = 3.0;
   double _elapsed = 0;
   bool _revealed = true;
   bool _fadeStarted = false;
   bool _fadeSoundPlayed = false;
+  bool _ready = false;
 
   bool get isRevealed => _revealed;
 
   /// 0.0 = fully hidden, 1.0 = fully visible. Used for fade-out animation.
   double get revealOpacity {
+    if (!_ready) return 1.0;
     if (_revealed && !_fadeStarted) return 1.0;
     if (!_revealed) return 0.0;
 
@@ -29,11 +31,13 @@ class ObstacleRevealManager extends Component
     await super.onLoad();
     _revealDuration =
         Timing.obstacleRevealDuration(game.sectorData.sector);
+    _ready = true;
   }
 
   @override
   void update(double dt) {
     super.update(dt);
+    if (!_ready) return;
     if (!game.gameStateManager.isPlaying) return;
     if (!_revealed) return;
 

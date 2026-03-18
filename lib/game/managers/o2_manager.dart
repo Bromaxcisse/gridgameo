@@ -5,9 +5,10 @@ import '../../the_oxygen_grid.dart';
 import 'game_state_manager.dart';
 
 class O2Manager extends Component with HasGameReference<TheOxygenGrid> {
-  late int _currentO2;
-  late int _startingO2;
-  late Timer _tickTimer;
+  int _currentO2 = 0;
+  int _startingO2 = 0;
+  Timer? _tickTimer;
+  bool _ready = false;
 
   int get currentO2 => _currentO2;
 
@@ -25,18 +26,21 @@ class O2Manager extends Component with HasGameReference<TheOxygenGrid> {
       onTick: () => deductO2(O2Costs.tick),
       repeat: true,
     );
-    _tickTimer.start();
+    _tickTimer!.start();
+    _ready = true;
   }
 
   @override
   void update(double dt) {
     super.update(dt);
+    if (!_ready) return;
     if (game.gameStateManager.isPlaying) {
-      _tickTimer.update(dt);
+      _tickTimer!.update(dt);
     }
   }
 
   void deductO2(int amount) {
+    if (!_ready) return;
     _currentO2 = (_currentO2 - amount).clamp(0, _startingO2);
 
     if (o2Percentage < O2Thresholds.criticalPercent && _currentO2 > 0) {

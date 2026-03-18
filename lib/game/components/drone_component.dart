@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
@@ -138,17 +139,20 @@ class DroneComponent extends PositionComponent
     final start = _opacity;
     final diff = target - start;
     double elapsed = 0;
+    bool finished = false;
     add(
       TimerComponent(
         period: 0.016,
         repeat: true,
         removeOnFinish: true,
         onTick: () {
+          if (finished) return;
           elapsed += 0.016;
           final t = (elapsed / duration).clamp(0.0, 1.0);
           _opacity = start + diff * t;
           if (t >= 1.0) {
-            removeWhere((c) => c is TimerComponent);
+            finished = true;
+            Future.microtask(() => removeWhere((c) => c is TimerComponent));
           }
         },
       ),

@@ -109,6 +109,7 @@ class CorrosiveTile extends PositionComponent
     final dx = end.dx - start.dx;
     final dy = end.dy - start.dy;
     final length = Offset(dx, dy).distance;
+    if (length <= 0) return;
     final unitDx = dx / length;
     final unitDy = dy / length;
 

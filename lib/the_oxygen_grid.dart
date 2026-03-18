@@ -28,6 +28,7 @@ class TheOxygenGrid extends FlameGame with PanDetector {
   TheOxygenGrid({required this.sectorData});
 
   final SectorData sectorData;
+  bool _loaded = false;
 
   late double tileSize;
   late Vector2 gridOffset;
@@ -52,6 +53,7 @@ class TheOxygenGrid extends FlameGame with PanDetector {
 
     _calculateLayout();
     _spawnComponents();
+    _loaded = true;
   }
 
   void _calculateLayout() {
@@ -196,6 +198,7 @@ class TheOxygenGrid extends FlameGame with PanDetector {
 
   @override
   void onPanEnd(DragEndInfo info) {
+    if (!_loaded) return;
     inputManager.handleSwipe(_panDelta);
   }
 }

@@ -12,8 +12,8 @@ const X = GridEntity.decayingWall;
 
 abstract final class SectorFactory {
   static SectorData getSector(int sector) {
-    assert(sector >= 1 && sector <= totalSectors, 'Sector $sector not defined');
-    return _sectors[sector - 1];
+    final clamped = sector.clamp(1, totalSectors);
+    return _sectors[clamped - 1];
   }
 
   static int get totalSectors => _sectors.length;
